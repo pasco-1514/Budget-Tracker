@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 // Database connection
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || 'input_your_mongodb_connection_string_here';
 const JWT_SECRET = process.env.JWT_SECRET || 'input_your_jwt_secret_key'; // Store in .env in production
 
