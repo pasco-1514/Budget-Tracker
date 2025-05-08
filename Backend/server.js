@@ -1,28 +1,17 @@
 const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const mongoose = require('mongoose');
+const cors = require('cors');
 const { body, validationResult } = require('express-validator');
 
-// App setup
 const app = express();
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Store in .env in production
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Routes
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-
-// Database connection
-const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || 'input_your_mongodb_connection_string_here';
-const JWT_SECRET = process.env.JWT_SECRET || 'input_your_jwt_secret_key'; // Store in .env in production
-
-
-// Get the input from front-end 
 
 // Placeholder Mongoose Schemas
 const userSchema = new mongoose.Schema({
@@ -58,19 +47,14 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-
-mongoose.connect(MONGO_URI, {
+// Connect to MongoDB (Placeholder)
+mongoose.connect('mongodb://localhost/budget-tracker', {
   useNewUrlParser: true,
   useUnifiedTopology: true
-})
-  .then(() => {
-    console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch(err => console.log(err));
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-
-// Route for User Register
+// Auth Routes
 app.post(
   '/api/auth/register',
   [
@@ -112,8 +96,6 @@ app.post(
   }
 );
 
-
-// Route for User Login
 app.post(
   '/api/auth/login',
   [
@@ -150,4 +132,101 @@ app.post(
   }
 );
 
+// Expense Routes
+app.get('/api/expenses', authMiddleware, async (req, res) => {
+  try {
+    const expenses = await Expense.find({ userId: req.user.userId }).sort({ date: -1 });
+    res.json(expenses);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
+app.post(
+  '/api/expenses',
+  authMiddleware,
+  [
+    body('date').isISO8601().withMessage('Invalid date'),
+    body('category').notEmpty().withMessage('Category is required'),
+    body('amount').isFloat({ min: 0 }).withMessage('Amount must be a positive number')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { date, category, amount, note } = req.body;
+
+    try {
+      const expense = new Expense({
+        userId: req.user.userId,
+        date,
+        category,
+        amount,
+        note
+      });
+
+      await expense.save();
+      res.status(201).json(expense);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+);
+
+app.patch(
+  '/api/expenses/:id',
+  authMiddleware,
+  [
+    body('date').optional().isISO8601().withMessage('Invalid date'),
+    body('category').optional().notEmpty().withMessage('Category cannot be empty'),
+    body('amount').optional().isFloat({ min: 0 }).withMessage('Amount must be a positive number')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { date, category, amount, note } = req.body;
+
+    try {
+      const expense = await Expense.findOne({ _id: req.params.id, userId: req.user.userId });
+      if (!expense) {
+        return res.status(404).json({ message: 'Expense not found' });
+      }
+
+      if (date) expense.date = date;
+      if (category) expense.category = category;
+      if (amount !== undefined) expense.amount = amount;
+      if (note !== undefined) expense.note = note;
+
+      await expense.save();
+      res.json(expense);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+);
+
+app.delete('/api/expenses/:id', authMiddleware, async (req, res) => {
+  try {
+    const expense = await Expense.findOneAndDelete({ _id: req.params.id, userId: req.user.userId });
+    if (!expense) {
+      return res.status(404).json({ message: 'Expense not found' });
+    }
+    res.json({ message: 'Expense deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
