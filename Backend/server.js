@@ -1,232 +1,29 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const { body, validationResult } = require('express-validator');
+require('dotenv').config();
+const express   = require('express');
+const cors      = require('cors');
+const session   = require('express-session');
+const passport  = require('passport');
+
+// 1) DB & passport
+require('./config/database')();
+require('./config/passport')(passport);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key'; // Store in .env in production
-
-// Middleware
-app.use(cors());
+app.use(cors({ origin:'http://localhost:5500', credentials:true }));
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false, saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Placeholder Mongoose Schemas
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+// 2) Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tx',   require('./routes/transactions'));
+app.use('/api/bud',  require('./routes/budgets'));
 
-const expenseSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  date: { type: Date, required: true },
-  category: { type: String, required: true },
-  amount: { type: Number, required: true },
-  note: { type: String },
-  createdAt: { type: Date, default: Date.now }
-});
+app.get('/', (req,res) => res.send('API is up'));
 
-const User = mongoose.model('User', userSchema);
-const Expense = mongoose.model('Expense', expenseSchema);
-
-// JWT Authentication Middleware
-const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
-  }
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
-  }
-};
-
-// Connect to MongoDB (Placeholder)
-mongoose.connect('mongodb://localhost/budget-tracker', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// Auth Routes
-app.post(
-  '/api/auth/register',
-  [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password } = req.body;
-
-    try {
-      let user = await User.findOne({ email });
-      if (user) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
-
-      const salt = await bcrypt.genSalt(12);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
-      user = new User({
-        email,
-        password: hashedPassword
-      });
-
-      await user.save();
-
-      const payload = { userId: user._id };
-      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-
-      res.status(201).json({ token });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-app.post(
-  '/api/auth/login',
-  [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('password').exists().withMessage('Password is required')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password } = req.body;
-
-    try {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-
-      const payload = { userId: user._id };
-      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-
-      res.json({ token });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-// Expense Routes
-app.get('/api/expenses', authMiddleware, async (req, res) => {
-  try {
-    const expenses = await Expense.find({ userId: req.user.userId }).sort({ date: -1 });
-    res.json(expenses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-app.post(
-  '/api/expenses',
-  authMiddleware,
-  [
-    body('date').isISO8601().withMessage('Invalid date'),
-    body('category').notEmpty().withMessage('Category is required'),
-    body('amount').isFloat({ min: 0 }).withMessage('Amount must be a positive number')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { date, category, amount, note } = req.body;
-
-    try {
-      const expense = new Expense({
-        userId: req.user.userId,
-        date,
-        category,
-        amount,
-        note
-      });
-
-      await expense.save();
-      res.status(201).json(expense);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-app.patch(
-  '/api/expenses/:id',
-  authMiddleware,
-  [
-    body('date').optional().isISO8601().withMessage('Invalid date'),
-    body('category').optional().notEmpty().withMessage('Category cannot be empty'),
-    body('amount').optional().isFloat({ min: 0 }).withMessage('Amount must be a positive number')
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { date, category, amount, note } = req.body;
-
-    try {
-      const expense = await Expense.findOne({ _id: req.params.id, userId: req.user.userId });
-      if (!expense) {
-        return res.status(404).json({ message: 'Expense not found' });
-      }
-
-      if (date) expense.date = date;
-      if (category) expense.category = category;
-      if (amount !== undefined) expense.amount = amount;
-      if (note !== undefined) expense.note = note;
-
-      await expense.save();
-      res.json(expense);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-app.delete('/api/expenses/:id', authMiddleware, async (req, res) => {
-  try {
-    const expense = await Expense.findOneAndDelete({ _id: req.params.id, userId: req.user.userId });
-    if (!expense) {
-      return res.status(404).json({ message: 'Expense not found' });
-    }
-    res.json({ message: 'Expense deleted' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT||5000;
+app.listen(PORT,()=> console.log(`🚀 Backend listening on ${PORT}`));
