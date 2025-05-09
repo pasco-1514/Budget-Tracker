@@ -29,7 +29,7 @@ router.post('/register', ensureLoggedOut, async (req,res) => {
 
     await user.save();
 
-    const payload = { userId: user._id };
+    const payload = { id: user._id };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({ token });
@@ -62,7 +62,7 @@ router.post('/login', ensureLoggedOut,
         return res.status(400).json({ message: 'Invalid credentials' });
       }
 
-      const payload = { userId: user._id };
+      const payload = { id: user._id };
       const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 
       res.json({ token });
