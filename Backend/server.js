@@ -25,5 +25,8 @@ app.use('/api/bud',  require('./routes/budgets'));
 
 app.get('/', (req,res) => res.send('API is up'));
 
+
 const PORT = process.env.PORT||5000;
 app.listen(PORT,()=> console.log(`🚀 Backend listening on ${PORT}`));
+
+
