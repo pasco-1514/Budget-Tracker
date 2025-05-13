@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Expense - Expense Tracker</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="flex flex-col justify-center items-center mt-8 w-4/5 mx-auto">
+      <h1 class="text-2xl font-medium text-gray-600 mb-6">Edit Expense</h1>
+
+      <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+        <form action="/expenses/<%= expense._id %>?_method=PUT" method="POST">
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Name</label
+            >
+            <input
+              type="text"
+              name="label"
+              value="<%= expense.label %>"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Amount</label
+            >
+            <input
+              type="number"
+              name="value"
+              value="<%= expense.value %>"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Date</label
+            >
+            <input
+              type="date"
+              name="date"
+              value="<%= expense.date %>"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <div class="flex justify-between">
+            <a
+              href="/"
+              class="bg-gray-300 text-gray-700 p-2.5 rounded cursor-pointer hover:bg-gray-400"
+            >
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="bg-amber-800 text-white p-2.5 rounded cursor-pointer hover:bg-amber-700"
+            >
+              Update Expense
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <div class="flex flex-col justify-center items-center mt-8 w-4/5 mx-auto">
+        <h1 class="text-2xl font-medium text-gray-600">Expense Tracker</h1>
+
+        <!-- Error message display -->
+        <% if (error) { %>
+        <div
+          class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 w-full"
+          role="alert"
+        >
+          <p><%= error %></p>
+        </div>
+        <% } %>
+
+        <div class="flex items-center justify-between mt-5 w-full">
+          <div class="relative flex justify-between w-72">
+            <button
+              id="addExpenseBtn"
+              class="bg-red-300 p-2.5 border-none outline-none cursor-pointer text-white text-medium"
+            >
+              Add Expense
+            </button>
+            <a
+              href="/report"
+              class="bg-blue-300 cursor-pointer p-2.5 text-white"
+            >
+              Expense Report
+            </a>
+          </div>
+
+          <!-- Search Form -->
+          <div class="flex">
+            <form action="/search" method="GET">
+              <input
+                type="text"
+                name="term"
+                placeholder="Search"
+                class="p-2.5 w-36 border-2 border-gray-600 border-solid"
+                value="<%= searchTerm %>"
+              />
+              <button type="submit" class="bg-gray-300 p-2.5">
+                <i class="fas fa-search"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Expense List -->
+        <div class="flex flex-col w-full">
+          <% expenses.forEach(expense => { %>
+          <div
+            class="relative flex justify-between items-center w-full h-24 bg-amber-50 my-5 py-2.5"
+          >
+            <h2 class="m-5 text-gray-600 text-lg font-medium">
+              <%= expense.label %>
+            </h2>
+            <h2 class="m-5 text-lg"><%= expense.date %></h2>
+            <h2 class="m-5 text-lg font-medium">$<%= expense.value %></h2>
+
+            <div class="flex mr-5">
+              <!-- Delete Form -->
+              <form
+                action="/expenses/<%= expense._id %>?_method=DELETE"
+                method="POST"
+                class="inline-block"
+              >
+                <button
+                  type="submit"
+                  class="text-red-500 mr-2.5 cursor-pointer"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+
+              <!-- Edit Link -->
+              <a
+                href="/expenses/<%= expense._id %>/edit"
+                class="text-gray-600 cursor-pointer"
+              >
+                <i class="fas fa-edit"></i>
+              </a>
+            </div>
+          </div>
+          <% }) %>
+
+          <!-- Total Sum Display -->
+          <div class="mt-5 p-4 bg-gray-100 rounded">
+            <strong>Total Expenses:</strong> $<%= totalSum %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Expense Form Modal -->
+    <div
+      id="addExpenseModal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Add New Expense</h2>
+          <button id="closeAddModal" class="text-red-500 text-xl">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form action="/expenses" method="POST">
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Name</label
+            >
+            <input
+              type="text"
+              name="label"
+              placeholder="e.g., Groceries"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Amount</label
+            >
+            <input
+              type="number"
+              name="value"
+              placeholder="0.00"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2"
+              >Expense Date</label
+            >
+            <input
+              type="date"
+              name="date"
+              class="w-full border border-gray-300 p-2.5 rounded"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-amber-800 text-white p-2.5 rounded cursor-pointer hover:bg-amber-700"
+          >
+            Add Expense
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
