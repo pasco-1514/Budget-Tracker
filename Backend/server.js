@@ -1,29 +1,35 @@
-require('dotenv').config();
-const express   = require('express');
-const cors      = require('cors');
-const session   = require('express-session');
-const passport  = require('passport');
-
-// 1) DB & passport
-require('./config/database')();
-require('./config/passport')(passport);
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const incomeRoutes = require("./routes/incomeRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const { protect } = require("./middleware/authMiddleware");
 
 const app = express();
-app.use(cors({ origin:'http://localhost:5500', credentials:true }));
+
+// Simple CORS configuration
+app.use(cors());
+
+// Parse JSON requests
 app.use(express.json());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false, saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 
-// 2) Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/tx',   require('./routes/transactions'));
-app.use('/api/bud',  require('./routes/budgets'));
+// Connect to database
+connectDB();
 
-app.get('/', (req,res) => res.send('API is up'));
+// Routes
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/income", incomeRoutes);
+app.use("/api/v1/expense", expenseRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
-const PORT = process.env.PORT||5000;
-app.listen(PORT,()=> console.log(`🚀 Backend listening on ${PORT}`));
+// Serve static files from the uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
