@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Budget Buddy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Top Navigation -->
+    <%- include('partials/header', { currentPage: 'home' }) %>
+
+    <div class="min-h-screen bg-gray-50 pb-10">
+        <div class="px-6 max-w-7xl mx-auto">
+            <!-- Welcome Banner -->
+            <div class="mt-6 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl p-6 text-white shadow-lg transition-all duration-500 transform opacity-0" id="welcomeBanner">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Welcome to Budget Buddy</h1>
+                        <p class="text-violet-100">Your personal finance dashboard</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                                <%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons and Analytics Chart -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Quick Actions -->
+                <div class="md:col-span-1 transition-all duration-500 opacity-0" id="quickActions">
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+
+                        <div class="space-y-3">
+                            <button onclick="toggleQuickExpenseForm()"
+                                    class="w-full bg-violet-500 hover:bg-violet-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="bx bx-plus mr-2"></i>
+                                Add New Expense
+                            </button>
+
+                            <button onclick="toggleQuickIncomeForm()"
+                                    class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="bx bx-plus mr-2"></i>
+                                Add New Income
+                            </button>
+
+                            <button onclick="exportData()" 
+                                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="bx bx-download mr-2"></i>
+                                Export Transactions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+<!-- Modify the Analytics Chart section -->
+<div class="md:col-span-2 transition-all duration-500 opacity-0" id="analyticsSection">
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800">All Transactions</h2>
+                <p class="text-sm text-gray-500 mt-1" id="dateRange"></p>
+            </div>
+            <div class="flex gap-2">
+                <select id="chartYearFilter" class="border border-gray-300 rounded-lg p-2 text-sm">
+                    <option value="">All Years</option>
+                    <!-- Years will be populated by JavaScript -->
+                </select>
+                <select id="chartMonthFilter" class="border border-gray-300 rounded-lg p-2 text-sm">
+                    <option value="">All Months</option>
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+                <select id="chartTypeFilter" class="border border-gray-300 rounded-lg p-2 text-sm">
+                    <option value="all">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <button onclick="toggleChartType()" 
+                        class="px-4 py-2 bg-violet-50 hover:bg-violet-100 text-violet-600 rounded-lg transition-colors flex items-center text-sm font-medium">
+                    Switch Chart Type
+                </button>
+            </div>
+        </div>
+        <canvas id="analyticsChart" height="300"></canvas>
+    </div>
+</div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-500 opacity-0" id="transactionsSection">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">Recent Transactions</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category/Source</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <!-- Transactions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Financial Tips Section -->
+            <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-500 opacity-0" id="tipsSection">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">Financial Tips</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Tip 1 -->
+                        <div class="bg-violet-50 rounded-lg p-4 border border-violet-100">
+                            <div class="bg-violet-100 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i class="bx bx-time text-violet-600"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-gray-800 mb-2">50/30/20 Rule</h4>
+                            <p class="text-gray-600 text-sm">
+                                Allocate 50% of your income to needs, 30% to wants, and 20% to savings for a balanced budget.
+                            </p>
+                        </div>
+
+                        <!-- Tip 2 -->
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i class="bx bx-shield text-blue-600"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-gray-800 mb-2">Emergency Fund</h4>
+                            <p class="text-gray-600 text-sm">
+                                Save 3-6 months of expenses in an easily accessible account for unexpected emergencies.
+                            </p>
+                        </div>
+
+                        <!-- Tip 3 -->
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-100">
+                            <div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i class="bx bx-trending-up text-green-600"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-gray-800 mb-2">Track Every Expense</h4>
+                            <p class="text-gray-600 text-sm">
+                                Consistently tracking all expenses helps identify areas where you can cut back and save more.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Budget Analysis Card -->
+                    <div class="mt-6 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        <div class="flex items-start">
+                            <div class="bg-yellow-100 p-2 rounded-full mr-3 mt-1">
+                                <i class="bx bx-info-circle text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-medium text-gray-800 mb-1">Budget Analysis</h4>
+                                <p class="text-gray-600 text-sm mb-2">
+                                    Based on your current spending patterns, you could save approximately
+                                    <span class="font-semibold text-green-600">$120 more per month</span>
+                                    by reducing discretionary expenses.
+                                </p>
+                                <button class="text-violet-600 hover:text-violet-700 text-sm font-medium transition-colors">
+                                    View Detailed Analysis →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coming Soon Features -->
+            <div class="mt-8 transition-all duration-500 opacity-0" id="comingSoonSection">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Coming Soon</h3>
+                            <p class="text-indigo-100 mb-4">
+                                We're working on exciting new features to help you manage your finances better!
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Budget Goals</span>
+                                <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Savings Tracker</span>
+                                <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Bill Reminders</span>
+                                <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Mobile App</span>
+                            </div>
+                        </div>
+                        <div class="hidden md:block">
+                            <i class="bx bx-time-five text-8xl text-white opacity-20"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Forms (Popups) -->
+    <div id="quickExpenseForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Add New Expense</h3>
+                    <button onclick="toggleQuickExpenseForm()" class="text-gray-500 hover:text-gray-700">
+                        <i class="bx bx-x text-2xl"></i>
+                    </button>
+                </div>
+                <form id="quickExpenseSubmitForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select id="quickExpenseCategory" class="w-full border border-gray-300 rounded-lg p-2">
+                            <option value="">Select Category</option>
+                            <option value="groceries">Groceries</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="rent">Rent</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="education">Education</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="number" id="quickExpenseAmount" 
+                                   class="w-full border border-gray-300 rounded-lg p-2 pl-8"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="quickExpenseDate" class="w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 bg-violet-500 hover:bg-violet-600 text-white py-2 rounded-lg">
+                            Save Expense
+                        </button>
+                        <button type="button" onclick="toggleQuickExpenseForm()" 
+                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="quickIncomeForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Add New Income</h3>
+                    <button onclick="toggleQuickIncomeForm()" class="text-gray-500 hover:text-gray-700">
+                        <i class="bx bx-x text-2xl"></i>
+                    </button>
+                </div>
+                <form id="quickIncomeSubmitForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                        <input type="text" id="quickIncomeSource" 
+                               class="w-full border border-gray-300 rounded-lg p-2"
+                               placeholder="e.g. Salary, Freelance">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="number" id="quickIncomeAmount" 
+                                   class="w-full border border-gray-300 rounded-lg p-2 pl-8"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="quickIncomeDate" class="w-full border border-gray-300 rounded-lg p-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg">
+                            Save Income
+                        </button>
+                        <button type="button" onclick="toggleQuickIncomeForm()" 
+                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form elements for edit functionality -->
+    <input type="hidden" id="editId" value="">
+    <input type="hidden" id="incomeEditId" value="">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+            const icon = document.querySelector('#mobileMenuBtn i');
+            icon.classList.toggle('bx-menu');
+            icon.classList.toggle('bx-x');
+            document.body.style.overflow = menu.classList.contains('hidden') ? 'auto' : 'hidden';
+        });
+
+        // Scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 10) {
+                header.classList.remove('bg-violet-600', 'text-white', 'py-4');
+                header.classList.add('bg-white', 'text-gray-800', 'shadow-md', 'py-2');
+            } else {
+                header.classList.add('bg-violet-600', 'text-white', 'py-4');
+                header.classList.remove('bg-white', 'text-gray-800', 'shadow-md', 'py-2');
+            }
+        });
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+
+        // Animation on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = [
+                'welcomeBanner', 
+                'quickActions', 
+                'analyticsSection', 
+                'transactionsSection', 
+                'tipsSection',
+                'comingSoonSection'
+            ];
+            
+            elements.forEach((id, index) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.remove('opacity-0');
+                }, index * 200);
+            });
+
+            // Initialize date range display
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('dateRange').textContent = 
+                `${firstDay.toLocaleDateString()} - ${today.toLocaleDateString()}`;
+            
+            // Initialize chart
+            initializeChart();
+        });
+
+        // Add this function at the start
+        function checkAuthResponse(response) {
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                throw new Error('Session expired. Please login again.');
+            }
+            return response;
+        }
+
+        // Initialize chart
+        // Chart filter state
+        let chartDataCache = { expenses: [], income: [] };
+        let chartFilterState = {
+            year: '',
+            month: '',
+            type: 'all'
+        };
+
+        // Populate year filter options
+        function populateChartYearFilter() {
+            const allDates = [
+          ...chartDataCache.expenses.map(e => new Date(e.date)),
+          ...chartDataCache.income.map(i => new Date(i.date))
+            ];
+            const years = [...new Set(allDates.map(d => d.getFullYear()))].sort((a, b) => b - a);
+            const yearSelect = document.getElementById('chartYearFilter');
+            yearSelect.innerHTML = `<option value="">All Years</option>` +
+          years.map(y => `<option value="${y}">${y}</option>`).join('');
+        }
+
+        // Filter and prepare chart data
+        function getFilteredChartData() {
+            const { year, month, type } = chartFilterState;
+            let expenses = chartDataCache.expenses;
+            let income = chartDataCache.income;
+
+            // Filter by year
+            if (year) {
+          expenses = expenses.filter(e => new Date(e.date).getFullYear().toString() === year);
+          income = income.filter(i => new Date(i.date).getFullYear().toString() === year);
+            }
+            // Filter by month
+            if (month !== '') {
+          expenses = expenses.filter(e => new Date(e.date).getMonth().toString() === month);
+          income = income.filter(i => new Date(i.date).getMonth().toString() === month);
+            }
+
+            // Prepare data for chart
+            const months = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ];
+
+            // If month is selected, show daily breakdown for that month
+            if (month !== '') {
+          // Get days in selected month/year
+          const daysInMonth = (() => {
+              const y = year ? parseInt(year) : new Date().getFullYear();
+              const m = parseInt(month);
+              return new Date(y, m + 1, 0).getDate();
+          })();
+          const labels = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
+          const sumByDay = (items) => {
+              const sums = Array(daysInMonth).fill(0);
+              items.forEach(item => {
+            const date = new Date(item.date);
+            if (
+                (!year || date.getFullYear().toString() === year) &&
+                date.getMonth().toString() === month
+            ) {
+                sums[date.getDate() - 1] += Number(item.amount || 0);
+            }
+              });
+              return sums;
+          };
+          return {
+              labels,
+              datasets: [
+            ...(type === 'all' || type === 'income'
+                ? [{
+              label: 'Income',
+              data: sumByDay(income),
+              backgroundColor: 'rgba(74, 222, 128, 0.7)',
+              borderColor: 'rgba(74, 222, 128, 1)',
+              borderWidth: 1
+                }] : []),
+            ...(type === 'all' || type === 'expense'
+                ? [{
+              label: 'Expenses',
+              data: sumByDay(expenses),
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1
+                }] : [])
+              ]
+          };
+            } else {
+          // Show monthly breakdown for selected year or all years
+          const sumByMonth = (items) => {
+              const sums = Array(12).fill(0);
+              items.forEach(item => {
+            const date = new Date(item.date);
+            if (!year || date.getFullYear().toString() === year) {
+                sums[date.getMonth()] += Number(item.amount || 0);
+            }
+              });
+              return sums;
+          };
+          return {
+              labels: months,
+              datasets: [
+            ...(type === 'all' || type === 'income'
+                ? [{
+              label: 'Income',
+              data: sumByMonth(income),
+              backgroundColor: 'rgba(74, 222, 128, 0.7)',
+              borderColor: 'rgba(74, 222, 128, 1)',
+              borderWidth: 1
+                }] : []),
+            ...(type === 'all' || type === 'expense'
+                ? [{
+              label: 'Expenses',
+              data: sumByMonth(expenses),
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1
+                }] : [])
+              ]
+          };
+            }
+        }
+
+        // Update chart with current filters
+        function updateAnalyticsChart() {
+            const chart = window.analyticsChart;
+            const filtered = getFilteredChartData();
+            chart.data.labels = filtered.labels;
+            chart.data.datasets = filtered.datasets;
+            chart.update();
+        }
+
+        // Chart filter event listeners
+        function setupChartFilters() {
+            document.getElementById('chartYearFilter').addEventListener('change', function () {
+          chartFilterState.year = this.value;
+          // Reset month filter if year changes and month is out of range
+          updateAnalyticsChart();
+            });
+            document.getElementById('chartMonthFilter').addEventListener('change', function () {
+          chartFilterState.month = this.value;
+          updateAnalyticsChart();
+            });
+            document.getElementById('chartTypeFilter').addEventListener('change', function () {
+          chartFilterState.type = this.value;
+          updateAnalyticsChart();
+            });
+        }
+
+        // Main chart initialization
+        async function initializeChart() {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            const token = localStorage.getItem('token');
+
+            // Fetch expenses and income from API
+            const [expenses, income] = await Promise.all([
+          fetch('/api/v1/expense/get', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          }).then(checkAuthResponse).then(res => res.json()),
+          fetch('/api/v1/income/get', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          }).then(checkAuthResponse).then(res => res.json())
+            ]);
+
+            chartDataCache.expenses = expenses;
+            chartDataCache.income = income;
+
+            populateChartYearFilter();
+            setupChartFilters();
+
+            // Set default filter state
+            chartFilterState.year = '';
+            chartFilterState.month = '';
+            chartFilterState.type = 'all';
+
+            // Initial chart
+            const chartConfig = {
+          type: 'bar',
+          data: getFilteredChartData(),
+          options: {
+              responsive: true,
+              scales: {
+            y: { beginAtZero: true }
+              }
+          }
+            };
+            window.analyticsChart = new Chart(ctx, chartConfig);
+        }
+
+        // Toggle chart type
+        function toggleChartType() {
+            if (window.analyticsChart.config.type === 'bar') {
+                window.analyticsChart.config.type = 'line';
+            } else {
+                window.analyticsChart.config.type = 'bar';
+            }
+            window.analyticsChart.update();
+        }
+
+        // Export data function
+        async function exportData() {
+            try {
+                const token = localStorage.getItem('token');
+                const expenses = await fetch('/api/v1/expense/get', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(checkAuthResponse)
+                .then(res => res.json());
+
+                const income = await fetch('/api/v1/income/get', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(checkAuthResponse)
+                .then(res => res.json());
+
+                // Combine and format data
+                const data = [
+                    ...expenses.map(e => ({ ...e, type: 'Expense' })),
+                    ...income.map(i => ({ ...i, type: 'Income' }))
+                ];
+
+                // Create CSV content
+                const csvContent = "data:text/csv;charset=utf-8," 
+                    + "Type,Category/Source,Amount,Date\n"
+                    + data.map(row => {
+                        const date = new Date(row.date).toLocaleDateString();
+                        const category = row.type === 'Expense' ? row.category : row.source;
+                        return `${row.type},${category},${row.amount},${date}`;
+                    }).join("\n");
+
+                // Trigger download
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "transactions.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Failed to export data');
+            }
+        }
+
+        // Quick Forms Toggle Functions
+        function toggleQuickExpenseForm() {
+            const form = document.getElementById('quickExpenseForm');
+            form.classList.toggle('hidden');
+            document.body.style.overflow = form.classList.contains('hidden') ? 'auto' : 'hidden';
+            
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('quickExpenseDate').valueAsDate = new Date();
+                document.getElementById('quickExpenseCategory').value = 'groceries';
+                document.getElementById('quickExpenseSubmitForm').reset();
+            }
+        }
+
+        function toggleQuickIncomeForm() {
+            const form = document.getElementById('quickIncomeForm');
+            form.classList.toggle('hidden');
+            document.body.style.overflow = form.classList.contains('hidden') ? 'auto' : 'hidden';
+            
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('quickIncomeDate').valueAsDate = new Date();
+                document.getElementById('quickIncomeSubmitForm').reset();
+            }
+        }
+
+        // Quick Expense Form Submit Handler
+        document.getElementById('quickExpenseSubmitForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('quickExpenseCategory').value;
+            const amount = document.getElementById('quickExpenseAmount').value;
+            const date = document.getElementById('quickExpenseDate').value;
+            
+            if (!category || !amount || !date) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const formData = {
+                category: category.toLowerCase(),
+                amount: parseFloat(amount),
+                date: new Date(date)
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/v1/expense/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                }).then(checkAuthResponse);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save expense');
+                }
+
+                const result = await response.json();
+                this.reset();
+                toggleQuickExpenseForm();
+                alert('Expense added successfully!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Failed to save expense');
+            }
+        });
+
+        // Quick Income Form Submit Handler
+        document.getElementById('quickIncomeSubmitForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const source = document.getElementById('quickIncomeSource').value;
+            const amount = document.getElementById('quickIncomeAmount').value;
+            const date = document.getElementById('quickIncomeDate').value;
+            
+            if (!source || !amount || !date) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const formData = {
+                source,
+                amount: parseFloat(amount),
+                date: new Date(date)
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/v1/income/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                }).then(checkAuthResponse);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save income');
+                }
+
+                const result = await response.json();
+                this.reset();
+                toggleQuickIncomeForm();
+                alert('Income added successfully!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Failed to save income');
+            }
+        });
+
+        // Load transactions
+        async function loadTransactions() {
+            try {
+                const token = localStorage.getItem('token');
+                const expenses = await fetch('/api/v1/expense/get', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(checkAuthResponse).then(res => res.json());
+
+                const income = await fetch('/api/v1/income/get', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(checkAuthResponse).then(res => res.json());
+
+                const allTransactions = [
+                    ...expenses.map(t => ({ ...t, type: 'Expense' })),
+                    ...income.map(t => ({ ...t, type: 'Income' }))
+                ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                renderTransactions(allTransactions.slice(0, 10));
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        // Render transactions to table
+        // Filter state
+        let allTransactionsCache = [];
+        let filterState = {
+            month: '',
+            year: '',
+            type: '',
+        };
+
+        // Render filter controls above the table
+        function renderTransactionFilters(transactions) {
+            // Get unique years from transactions
+            const years = [...new Set(transactions.map(t => new Date(t.date).getFullYear()))];
+            years.sort((a, b) => b - a);
+
+            // Get unique categories/sources
+            const categories = [
+          ...new Set(
+              transactions.map(t =>
+            t.type === 'Income'
+                ? t.source
+                : t.category
+              )
+          ),
+            ].filter(Boolean);
+
+            // If filter container exists, clear it, else create it
+            let filterDiv = document.getElementById('transactionFilters');
+            if (!filterDiv) {
+          filterDiv = document.createElement('div');
+          filterDiv.id = 'transactionFilters';
+          filterDiv.className = 'flex flex-wrap gap-4 mb-4 items-center';
+          const tableSection = document.getElementById('transactionsSection');
+          tableSection.insertBefore(filterDiv, tableSection.children[1]);
+            } else {
+          filterDiv.innerHTML = '';
+            }
+
+            // Month filter
+            const monthSelect = document.createElement('select');
+            monthSelect.className = 'border border-gray-300 rounded-lg p-2 text-sm';
+            monthSelect.innerHTML = `<option value="">All Months</option>
+          ${[
+              'January','February','March','April','May','June',
+              'July','August','September','October','November','December'
+          ].map((m, i) =>
+              `<option value="${i}">${m}</option>`
+          ).join('')}
+            `;
+            monthSelect.value = filterState.month;
+            monthSelect.onchange = function() {
+          filterState.month = this.value;
+          renderTransactions(applyTransactionFilters());
+            };
+
+            // Year filter
+            const yearSelect = document.createElement('select');
+            yearSelect.className = 'border border-gray-300 rounded-lg p-2 text-sm';
+            yearSelect.innerHTML = `<option value="">All Years</option>
+          ${years.map(y => `<option value="${y}">${y}</option>`).join('')}
+            `;
+            yearSelect.value = filterState.year;
+            yearSelect.onchange = function() {
+          filterState.year = this.value;
+          renderTransactions(applyTransactionFilters());
+            };
+
+            // Type filter
+            const typeSelect = document.createElement('select');
+            typeSelect.className = 'border border-gray-300 rounded-lg p-2 text-sm';
+            typeSelect.innerHTML = `
+          <option value="">All Types</option>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+            `;
+            typeSelect.value = filterState.type;
+            typeSelect.onchange = function() {
+          filterState.type = this.value;
+          renderTransactions(applyTransactionFilters());
+            };
+
+            // Category filter (optional, only if type is selected)
+            let categorySelect = null;
+            if (filterState.type) {
+          categorySelect = document.createElement('select');
+          categorySelect.className = 'border border-gray-300 rounded-lg p-2 text-sm';
+          categorySelect.innerHTML = `<option value="">All ${filterState.type === 'Income' ? 'Sources' : 'Categories'}</option>
+              ${categories
+            .filter(cat => {
+                if (filterState.type === 'Income') {
+              return transactions.some(t => t.type === 'Income' && t.source === cat);
+                } else {
+              return transactions.some(t => t.type === 'Expense' && t.category === cat);
+                }
+            })
+            .map(cat => `<option value="${cat}">${cat}</option>`)
+            .join('')}
+          `;
+          categorySelect.value = filterState.category || '';
+          categorySelect.onchange = function() {
+              filterState.category = this.value;
+              renderTransactions(applyTransactionFilters());
+          };
+            }
+
+            // Reset button
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm';
+            resetBtn.textContent = 'Reset Filters';
+            resetBtn.onclick = function() {
+          filterState = { month: '', year: '', type: '', category: '' };
+          renderTransactions(applyTransactionFilters());
+          renderTransactionFilters(allTransactionsCache);
+            };
+
+            // Add to filterDiv
+            filterDiv.appendChild(monthSelect);
+            filterDiv.appendChild(yearSelect);
+            filterDiv.appendChild(typeSelect);
+            if (categorySelect) filterDiv.appendChild(categorySelect);
+            filterDiv.appendChild(resetBtn);
+        }
+
+        // Apply filters to cached transactions
+        function applyTransactionFilters() {
+            let filtered = allTransactionsCache.slice();
+            if (filterState.year) {
+          filtered = filtered.filter(t => new Date(t.date).getFullYear().toString() === filterState.year);
+            }
+            if (filterState.month !== '') {
+          filtered = filtered.filter(t => new Date(t.date).getMonth().toString() === filterState.month);
+            }
+            if (filterState.type) {
+          filtered = filtered.filter(t => t.type === filterState.type);
+            }
+            if (filterState.category) {
+          filtered = filtered.filter(t =>
+              filterState.type === 'Income'
+            ? t.source === filterState.category
+            : t.category === filterState.category
+          );
+            }
+            return filtered.slice(0, 10);
+        }
+
+        function renderTransactions(transactions) {
+            // Render filters
+            renderTransactionFilters(allTransactionsCache);
+
+            const tableBody = document.getElementById('transactionsTable');
+            tableBody.innerHTML = '';
+
+            if (transactions.length === 0) {
+          tableBody.innerHTML = `
+              <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                No transactions found
+            </td>
+              </tr>
+          `;
+          return;
+            }
+
+            transactions.forEach(transaction => {
+          const row = document.createElement('tr');
+          row.className = 'border-b border-gray-100 hover:bg-gray-50';
+
+          const typeCell = document.createElement('td');
+          typeCell.className = 'px-6 py-4 whitespace-nowrap';
+          typeCell.innerHTML = `
+              <span class="px-2 py-1 rounded-full text-xs font-medium ${
+            transaction.type === 'Income' ?
+            'bg-green-100 text-green-800' :
+            'bg-violet-100 text-violet-800'
+              }">
+            ${transaction.type}
+              </span>
+          `;
+
+          const categoryCell = document.createElement('td');
+          categoryCell.className = 'px-6 py-4 whitespace-nowrap';
+          categoryCell.textContent = transaction.type === 'Income' ?
+              transaction.source :
+              transaction.category;
+
+          const amountCell = document.createElement('td');
+          amountCell.className = 'px-6 py-4 whitespace-nowrap font-medium';
+          amountCell.textContent = `$${transaction.amount.toFixed(2)}`;
+          amountCell.className += transaction.type === 'Income' ?
+              ' text-green-600' :
+              ' text-violet-600';
+
+          const dateCell = document.createElement('td');
+          dateCell.className = 'px-6 py-4 whitespace-nowrap text-gray-500';
+          dateCell.textContent = new Date(transaction.date).toLocaleDateString();
+
+          const actionsCell = document.createElement('td');
+          actionsCell.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+          actionsCell.innerHTML = `
+              <button onclick="handleDeleteTransaction('${transaction._id}', '${transaction.type === 'Income' ? 'income' : 'expense'}')"
+                class="text-red-600 hover:text-red-900">
+            Delete
+              </button>
+          `;
+
+          row.appendChild(typeCell);
+          row.appendChild(categoryCell);
+          row.appendChild(amountCell);
+          row.appendChild(dateCell);
+          row.appendChild(actionsCell);
+
+          tableBody.appendChild(row);
+            });
+        }
+
+        // Override loadTransactions to cache all transactions and render filters
+        async function loadTransactions() {
+            try {
+          const token = localStorage.getItem('token');
+          const expenses = await fetch('/api/v1/expense/get', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          }).then(checkAuthResponse).then(res => res.json());
+
+          const income = await fetch('/api/v1/income/get', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          }).then(checkAuthResponse).then(res => res.json());
+
+          allTransactionsCache = [
+              ...expenses.map(t => ({ ...t, type: 'Expense' })),
+              ...income.map(t => ({ ...t, type: 'Income' }))
+          ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          renderTransactions(allTransactionsCache.slice(0, 10));
+            } catch (error) {
+          console.error('Error loading transactions:', error);
+            }
+        }
+
+        // Delete handlers
+        async function handleDeleteTransaction(id, type) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`/api/v1/${type}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete');
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete transaction');
+            }
+        }
+
+        // Edit handlers
+        function handleEdit(transaction) {
+            const formType = transaction.type === 'expense' ? 'expense' : 'income';
+            
+            if (formType === 'expense') {
+                document.getElementById('editId').value = transaction._id;
+                document.getElementById('quickExpenseCategory').value = transaction.category;
+                document.getElementById('quickExpenseAmount').value = transaction.amount;
+                document.getElementById('quickExpenseDate').value = new Date(transaction.date).toISOString().split('T')[0];
+                toggleQuickExpenseForm();
+            } else {
+                document.getElementById('incomeEditId').value = transaction._id;
+                document.getElementById('quickIncomeSource').value = transaction.source;
+                document.getElementById('quickIncomeAmount').value = transaction.amount;
+                document.getElementById('quickIncomeDate').value = new Date(transaction.date).toISOString().split('T')[0];
+                toggleQuickIncomeForm();
+            }
+        }
+
+        // Initialize the page
+        loadTransactions();
+    </script>
+</body>
+</html>

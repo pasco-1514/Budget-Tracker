@@ -1,0 +1,9 @@
+/* public/css/style.css */
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+.input-field input[type="email"],
+.input-field input[type="password"] {
+  color: #333;
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <h3 class="purple-text text-darken-3 center-align">Admin Dashboard</h3>
+
+    <div class="right-align">
+      <button class="btn red" id="logoutBtn">Logout</button>
+    </div>
+
+    <h5 class="blue-text text-darken-2">Manage Users</h5>
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Admin</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTable">
+        <!-- Filled by adminDashboard.js -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="/js/adminDashboard.js"></script>
+  <script>
+    document.getElementById('logoutBtn').onclick = () => {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    };
+  </script>
+</body>
+</html>

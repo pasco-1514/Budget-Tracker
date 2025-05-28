@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Budget Buddy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Header section same as dashboard -->
+    <%- include('partials/header', { currentPage: 'income' }) %>
+
+    <div class="min-h-screen bg-gray-50 pb-10">
+        <div class="px-6 max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mt-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 md:mb-0">Income Management</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="handlePrint()" 
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg shadow-sm transition-all flex items-center text-sm">
+                        <i class="bx bx-printer mr-2"></i>
+                        <span>Print</span>
+                    </button>
+
+                    <button onclick="toggleIncomeForm()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center">
+                        <i class="bx bx-plus mr-2"></i>
+                        <span id="formToggleText">Add Income</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="statsCards">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Add/Edit Form -->
+            <div id="incomeForm" class="hidden mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto border border-green-100">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                        <i class="bx bx-plus-circle mr-2 text-green-500"></i>
+                        <span id="formTitle">Add New Income</span>
+                    </h3>
+
+                    <form id="incomeSubmitForm" class="space-y-4">
+                        <input type="hidden" id="editId">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                            <input type="text" id="source" 
+                                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                   placeholder="e.g. Salary, Freelance">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                <input type="number" id="amount" 
+                                       class="w-full border border-gray-300 rounded-lg p-2 pl-8 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                       placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input type="date" id="date" 
+                                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                            <textarea id="description" 
+                                      class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                      rows="3"></textarea>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" 
+                                    class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors">
+                                <span id="submitButtonText">Add Income</span>
+                            </button>
+                            <button type="button" 
+                                    onclick="toggleIncomeForm()" 
+                                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Income Table -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">Income Records</h3>
+                        <div class="flex items-center space-x-4">
+                            <select id="monthFilter" class="border rounded-lg px-3 py-1">
+                                <option value="">All Months</option>
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                            <select id="yearFilter" class="border rounded-lg px-3 py-1">
+                                <option value="">All Years</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="incomeTable">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add this function at the start
+        function checkAuthResponse(response) {
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                throw new Error('Session expired. Please login again.');
+            }
+            return response;
+        }
+
+        let incomeList = [];
+
+        // Fetch income when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchIncome();
+            // Set default date to today for the form
+            document.getElementById('date').valueAsDate = new Date();
+        });
+
+        // Update fetchIncome
+        async function fetchIncome() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/v1/income/get', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(checkAuthResponse);
+                
+                incomeList = await response.json();
+                populateYearFilter();
+                updateUI();
+            } catch (error) {
+                console.error('Error:', error);
+                if (!error.message.includes('Session expired')) {
+                    alert('Failed to load income data');
+                }
+            }
+        }
+
+        function updateUI() {
+            const filteredData = filterAndSortIncome();
+            updateStatsCards();
+            updateIncomeTable(filteredData);
+        }
+
+        function filterAndSortIncome() {
+            let filtered = [...incomeList];
+            
+            // Month filter
+            const monthFilter = document.getElementById('monthFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            
+            if (monthFilter !== '' || yearFilter !== '') {
+                filtered = filtered.filter(income => {
+                    const incomeDate = new Date(income.date);
+                    if (monthFilter !== '' && yearFilter !== '') {
+                        return incomeDate.getMonth() === parseInt(monthFilter) && 
+                               incomeDate.getFullYear() === parseInt(yearFilter);
+                    } else if (monthFilter !== '') {
+                        return incomeDate.getMonth() === parseInt(monthFilter);
+                    } else {
+                        return incomeDate.getFullYear() === parseInt(yearFilter);
+                    }
+                });
+            }
+
+            // Sort by date (newest first)
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            return filtered;
+        }
+
+        function populateYearFilter() {
+            const yearFilter = document.getElementById('yearFilter');
+            const years = new Set(incomeList.map(income => 
+                new Date(income.date).getFullYear()
+            ));
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            
+            yearFilter.innerHTML = '<option value="">All Years</option>';
+            sortedYears.forEach(year => {
+                yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
+            });
+        }
+
+        function updateStatsCards() {
+            const statsContainer = document.getElementById('statsCards');
+            const total = incomeList.reduce((sum, inc) => sum + inc.amount, 0);
+            const avg = incomeList.length ? total / incomeList.length : 0;
+
+            // Get category totals
+            const categoryTotals = {};
+            incomeList.forEach(inc => {
+                categoryTotals[inc.category] = (categoryTotals[inc.category] || 0) + inc.amount;
+            });
+            
+            const topCategory = Object.entries(categoryTotals)
+                .sort(([,a], [,b]) => b - a)[0];
+
+            statsContainer.innerHTML = `
+                <div class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-green-100 p-3 rounded-full text-green-600 mr-3">
+                            <i class="bx bx-dollar text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Total Income</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">$${total.toFixed(2)}</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-blue-100 p-3 rounded-full text-blue-600 mr-3">
+                            <i class="bx bx-line-chart text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Average Income</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">$${avg.toFixed(2)}</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-purple-100 p-3 rounded-full text-purple-600 mr-3">
+                            <i class="bx bx-category text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Top Category</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">${incomeList.length ? incomeList[0].source : '-'}</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-yellow-100 p-3 rounded-full text-yellow-600 mr-3">
+                            <i class="bx bx-time text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Total Entries</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">${incomeList.length}</p>
+                </div>
+            `;
+        }
+
+        function updateIncomeTable(data) {
+            const tbody = document.querySelector('#incomeTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(income => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${income.source}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">$${income.amount.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(income.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editIncome('${income._id}')" class="text-blue-500 hover:text-blue-700 mr-2">
+                            <i class="bx bx-edit"></i>
+                        </button>
+                        <button onclick="deleteIncome('${income._id}')" class="text-red-500 hover:text-red-700">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function toggleIncomeForm() {
+            const form = document.getElementById('incomeForm');
+            const isHidden = form.classList.contains('hidden');
+            
+            if (isHidden) {
+                form.classList.remove('hidden');
+                document.getElementById('formToggleText').textContent = 'Close Form';
+                // Set default date
+                document.getElementById('date').valueAsDate = new Date();
+            } else {
+                form.classList.add('hidden');
+                document.getElementById('formToggleText').textContent = 'Add Income';
+                document.getElementById('incomeSubmitForm').reset();
+                document.getElementById('editId').value = '';
+                document.getElementById('formTitle').textContent = 'Add New Income';
+                document.getElementById('submitButtonText').textContent = 'Add Income';
+            }
+        }
+
+        async function editIncome(id) {
+            try {
+                console.log('Editing income:', id); // Debug log
+                const income = incomeList.find(inc => inc._id === id);
+                if (!income) {
+                    console.error('Income not found:', id);
+                    return;
+                }
+
+                // Set form values
+                document.getElementById('editId').value = id;
+                document.getElementById('source').value = income.source;
+                document.getElementById('amount').value = income.amount;
+                document.getElementById('date').value = new Date(income.date).toISOString().split('T')[0];
+                document.getElementById('description').value = income.description || '';
+
+                // Update form UI
+                document.getElementById('formTitle').textContent = 'Edit Income';
+                document.getElementById('submitButtonText').textContent = 'Update Income';
+                document.getElementById('formToggleText').textContent = 'Close Form';
+                document.getElementById('incomeForm').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error in editIncome:', error);
+                alert('Error loading income data for editing');
+            }
+        }
+
+        // Update form submission handler
+        document.getElementById('incomeSubmitForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = {
+                    source: document.getElementById('source').value,
+                    amount: parseFloat(document.getElementById('amount').value),
+                    date: new Date(document.getElementById('date').value),
+                    description: document.getElementById('description').value
+                };
+
+                if (!formData.source || !formData.amount || !formData.date) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                console.log('Form data:', formData); // Debug log
+
+                const editId = document.getElementById('editId').value;
+                const token = localStorage.getItem('token');
+                const url = editId ? `/api/v1/income/${editId}` : '/api/v1/income/add';
+                const method = editId ? 'PUT' : 'POST';
+
+                console.log('Request:', { url, method }); // Debug log
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                }).then(checkAuthResponse);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save income');
+                }
+
+                // Reset form and UI
+                this.reset();
+                document.getElementById('editId').value = '';
+                toggleIncomeForm();
+                await fetchIncome();
+                alert(editId ? 'Income updated successfully!' : 'Income added successfully!');
+            } catch (error) {
+                console.error('Error saving income:', error);
+                alert(error.message || 'Failed to save income');
+            }
+        });
+
+        // Update delete handler
+        async function deleteIncome(id) {
+            if (!confirm('Are you sure you want to delete this income record?')) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/v1/income/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(checkAuthResponse);
+
+                await fetchIncome();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete income');
+            }
+        }
+
+        // Event listener for month/year filter
+        document.getElementById('monthFilter').addEventListener('change', updateUI);
+        document.getElementById('yearFilter').addEventListener('change', updateUI);
+
+        function handlePrint() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+    <div class='flex flex-col md:flex-row min-h-screen bg-gray-50 overflow-hidden'>
+        <!-- Content Side -->
+        <div class='w-full md:w-[55%] px-6 md:px-12 pt-8 pb-12 flex flex-col justify-between relative fade-in'>
+            <!-- Top decorative shapes -->
+            <div class='absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-100 to-transparent rounded-full -mr-32 -mt-32 opacity-70 shape-1'></div>
+            <div class='absolute top-1/4 left-0 w-32 h-32 bg-gradient-to-br from-fuchsia-100 to-transparent rounded-full -ml-16 opacity-60 shape-2'></div>
+
+            <!-- Logo & Brand -->
+            <div class="z-10">
+                <div class="flex items-center mb-8 slide-up">
+                    <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
+                        <i class="bx bx-wallet text-white text-xl"></i>
+                    </div>
+                    <h2 class="ml-3 text-xl font-bold text-gray-800 tracking-wide">Budget Buddy</h2>
+                </div>
+
+                <!-- Main Content -->
+                <div class="bg-white rounded-2xl p-8 shadow-xl shadow-violet-200/20 border border-gray-100 slide-up">
+                    <%- body %>
+                </div>
+            </div>
+
+            <!-- Testimonial Footer -->
+            <div class="mt-6 z-10 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-xl p-4 border border-violet-100/50 slide-up">
+                <!-- ...existing testimonial code... -->
+            </div>
+        </div>
+
+        <!-- Decorator Side -->
+        <div class="hidden md:block w-[45%] h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-8 relative fade-in">
+            <!-- Decorative shapes -->
+            <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute -top-7 -left-5 floating"></div>
+            <div class="w-48 h-56 rounded-[40px] border-[10px] border-white/20 backdrop-blur-sm absolute top-[30%] -right-10 floating-delayed"></div>
+            <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute -bottom-7 -left-5 floating"></div>
+
+            <!-- Content -->
+            <div class="relative z-20 h-full flex flex-col justify-between">
+                <div>
+                    <h2 class="text-white text-3xl md:text-4xl font-bold mb-4 slide-up">
+                        Take control<br/>of your finances
+                    </h2>
+                    <p class="text-violet-100 mb-8 max-w-md slide-up">
+                        Join thousands of users who use Budget Buddy to track expenses,
+                        manage income, and achieve financial goals.
+                    </p>
+
+                    <!-- Feature Cards -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="feature-card slide-up">
+                            <div class="icon">
+                                <i class="bx bx-trending-up"></i>
+                            </div>
+                            <span>Track Income & Expenses</span>
+                        </div>
+                        <div class="feature-card slide-up" style="animation-delay: 200ms">
+                            <div class="icon">
+                                <i class="bx bx-pie-chart"></i>
+                            </div>
+                            <span>Visualize Your Spending</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Image -->
+                <div class="relative">
+                    <img src="/images/card2.png" 
+                         class="w-64 lg:w-[80%] mx-auto shadow-2xl shadow-purple-900/30 rounded-lg object-cover preview-image" 
+                         alt="Financial Dashboard Preview">
+
+                    <!-- Floating Stats -->
+                    <div class="stat-card top">
+                        <div class="icon green">
+                            <i class="bx bx-bar-chart"></i>
+                        </div>
+                        <div>
+                            <p class="label">SAVINGS</p>
+                            <p class="value">+27.4%</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bottom">
+                        <div class="icon blue">
+                            <i class="bx bx-flag"></i>
+                        </div>
+                        <div>
+                            <p class="label">GOALS</p>
+                            <p class="value">2/3 Achieved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>

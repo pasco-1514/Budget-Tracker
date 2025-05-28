@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Budget Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f4fc;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .form-section {
+      flex: 1;
+      padding: 60px;
+      background-color: white;
+    }
+    .form-section h2 {
+      font-size: 2rem;
+      color: #7c3aed;
+      margin-bottom: 10px;
+    }
+    .form-section p {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .form-section input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .form-section button {
+      background-color: #7c3aed;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .form-section a {
+      color: #7c3aed;
+      text-decoration: none;
+    }
+    .right-panel {
+      flex: 1;
+      background: linear-gradient(135deg, #c084fc, #a78bfa);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 40px;
+    }
+    .right-panel i {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .right-panel h4 {
+      font-weight: 600;
+      font-size: 20px;
+    }
+    .message {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .error {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen page-container">
+        <!-- Content Side -->
+        <div class="w-[55%] px-4 md:px-12 pt-4 md:pt-8 pb-6 md:pb-12 flex flex-col justify-between relative fade-in content-side">
+            <!-- Logo & Content -->
+            <div class="z-10">
+                <div class="flex items-center mb-8 slide-up logo-section">
+                    <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
+                        <i class="bx bx-wallet text-white text-xl"></i>
+                    </div>
+                    <h2 class="ml-3 text-xl font-bold text-gray-800 tracking-wide">Budget Buddy</h2>
+                </div>
+
+                <!-- Form Container -->
+                <div class="bg-white rounded-2xl p-4 md:p-8 shadow-xl shadow-violet-200/20 border border-gray-100 slide-up form-container">
+                    <div class="lg:w-[70%] h-3/4 md:h-full flex flex-col justify-center">
+                        <h3 class="text-xl font-semibold text-black">Create an Account</h3>
+                        <p class="text-xs text-slate-700 mt-[5px] mb-6">
+                            Join us today by entering your details below.
+                        </p>
+
+                        <form id="signupForm" class="space-y-4">
+                            <!-- Added Full Name field -->
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Full Name</label>
+                                <input 
+                                    type="text" 
+                                    name="fullName"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    placeholder="Enter your full name"
+                                    required
+                                />
+                            </div>
+
+                            <!-- Email and Password fields -->
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    name="email"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    placeholder="student@example.com"
+                                    required
+                                />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Password</label>
+                                <input 
+                                    type="password" 
+                                    name="password"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    placeholder="Min 8 Characters"
+                                    required
+                                    minlength="8"
+                                />
+                            </div>
+
+                            <p id="errorMsg" class="text-red-500 text-xs"></p>
+
+                            <button type="submit" 
+                                    class="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-lg transition-colors">
+                                SIGN UP
+                            </button>
+
+                            <p class="text-[13px] text-slate-800">
+                                Already have an account? 
+                                <a href="/login" class="font-medium text-violet-600 underline">Login</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial Footer -->
+            <div class="absolute -bottom-28 -right-28 opacity-90 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-96" viewBox="0 0 975 900">
+                    <path fill="url(#gradient)" d="M543.5,-432.3C686.2,-386.4,825.1,-276.7,870.1,-143.3C915.1,-10,865.2,151.3,798.7,276.7C732.2,402.1,648.9,490.6,546.4,546.4C443.9,602.1,322.1,624.1,215.1,570.1C108.1,516.1,15.9,396.1,-37.3,284.6C-90.5,173.1,-118.1,70.2,-107.3,-24.3C-96.5,-118.7,-47.3,-197.3,54.6,-242.3C156.5,-287.3,312.9,-297.3,543.5,-432.3Z" width="100%" height="100%" transform="translate(0 0)" />
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color: rgba(124, 58, 237, 1); stop-opacity: 1" />
+                            <stop offset="100%" style="stop-color: rgba(156, 163, 175, 1); stop-opacity: 1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Decorator Side - Adding the same as login page -->
+        <div class="w-[45%] h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-8 relative fade-in decorator-side">
+            <!-- Content moved to top -->
+            <div class="relative z-20 h-full flex flex-col">
+                <div class="mb-auto">
+                    <h2 class="text-white text-3xl md:text-4xl font-bold mb-4 slide-up">
+                        Join our community<br/>of smart savers
+                    </h2>
+                    <p class="text-violet-100 mb-8 max-w-md slide-up">
+                        Create your account today and start your journey towards better financial management.
+                    </p>
+
+                    <!-- Feature Cards -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="flex gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 slide-up hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl">
+                                <i class="bx bx-lock-alt"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-white">Secure & Private</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 slide-up hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-xl flex items-center justify-center text-white text-xl">
+                                <i class="bx bx-line-chart"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-white">Track Your Progress</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decorative shapes -->
+                <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute top-[70%] left-10 shape-animation"></div>
+                <div class="w-48 h-56 rounded-[40px] border-[10px] border-white/20 backdrop-blur-sm absolute top-[30%] -right-10 shape-animation" style="animation-delay: 2s"></div>
+                <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute -bottom-7 -left-5 shape-animation"></div>
+
+                <!-- Preview Image & Stats -->
+                <div class="mt-auto relative">
+                    <img src="/images/image.png" 
+                         class="w-64 lg:w-[80%] mx-auto shadow-2xl shadow-purple-900/30 rounded-lg object-cover slide-up"
+                         alt="Financial Dashboard Preview">
+
+                    <!-- Floating Stats -->
+                    <div class="absolute top-10 -right-4 bg-white/90 backdrop-blur-md p-3 rounded-lg shadow-lg slide-up">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center bg-green-100 rounded-full text-green-600">
+                                <i class="bx bx-user-plus"></i>
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-xs text-gray-500">NEW USERS</p>
+                                <p class="text-sm font-bold text-gray-800">This Week: 234</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute -bottom-4 left-10 bg-white/90 backdrop-blur-md p-3 rounded-lg shadow-lg slide-up">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600">
+                                <i class="bx bx-check-shield"></i>
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-xs text-gray-500">TRUSTED BY</p>
+                                <p class="text-sm font-bold text-gray-800">10K+ Users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/signup.js"></script>
+</body>
+</html>

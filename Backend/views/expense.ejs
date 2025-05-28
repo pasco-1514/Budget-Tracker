@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Management | Budget Buddy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <%- include('partials/header', { currentPage: 'expenses' }) %>
+
+    <div class="min-h-screen bg-gray-50 pb-10">
+        <div class="px-6 max-w-7xl mx-auto">
+            <!-- Action Buttons Section (from React Expense.jsx) -->
+            <div class="flex flex-col md:flex-row justify-between items-center mt-6 mb-6 slide-up">
+                <h2 class="text-2xl font-semibold text-gray-800">Expense Management</h2>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="handlePrint()"
+                      class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg shadow-sm transition-all flex items-center text-sm">
+                        <i class="bx bx-printer mr-2"></i>
+                        <span>Print</span>
+                    </button>
+                    <button onclick="toggleExpenseForm()"
+                      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center">
+                        <i class="bx bx-plus mr-2"></i>
+                        <span id="formToggleText">Add Expense</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 slide-up" id="statsCards">
+                <!-- Total Expenses Card -->
+                <div class="bg-white rounded-xl p-5 shadow-md transition-all duration-500 transform hover:scale-105">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-red-100 p-3 rounded-full text-red-600 mr-3">
+                            <i class="bx bx-bar-chart text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Total Expenses</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">$<span id="totalExpenses">0.00</span></p>
+                </div>
+
+                <!-- Top Category Card -->
+                <div class="bg-white rounded-xl p-5 shadow-md transition-all duration-500 transform hover:scale-105">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-blue-100 p-3 rounded-full text-blue-600 mr-3">
+                            <i class="bx bx-category text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Top Category</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800" id="topCategory">-</p>
+                </div>
+
+                <!-- Average Expense Card -->
+                <div class="bg-white rounded-xl p-5 shadow-md transition-all duration-500 transform hover:scale-105">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-green-100 p-3 rounded-full text-green-600 mr-3">
+                            <i class="bx bx-dollar-circle text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Average Expense</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">$<span id="averageExpense">0.00</span></p>
+                </div>
+
+                <!-- Recent Activity Card -->
+                <div class="bg-white rounded-xl p-5 shadow-md transition-all duration-500 transform hover:scale-105">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-purple-100 p-3 rounded-full text-purple-600 mr-3">
+                            <i class="bx bx-time text-xl"></i>
+                        </div>
+                        <h3 class="text-gray-600 text-sm font-medium">Recent Activity</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800" id="recentActivity">-</p>
+                </div>
+            </div>
+
+            <!-- Add/Edit Expense Form Section -->
+            <div id="expenseForm" class="hidden bg-white p-6 rounded-xl shadow-md max-w-md mb-8 border border-red-100 slide-up">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                    <i class="bx bx-edit mr-2 text-red-500"></i>
+                    <span id="formTitle">Add New Expense</span>
+                </h3>
+                <form id="expenseSubmitForm">
+                    <input type="hidden" id="editId">
+                    <div class="mb-4">
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" 
+                               class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none">
+                            <option value="">Select Category</option>
+                            <option value="groceries">Groceries</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="rent">Rent</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="education">Education</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Amount</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">$</span>
+                            <input type="number" id="amount"
+                                   class="w-full border border-gray-300 p-2 pl-8 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" id="expenseDate"
+                               class="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit"
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors shadow-md">
+                            <span id="submitButtonText">Save Expense</span>
+                        </button>
+                        <button type="button"
+                                onclick="cancelExpenseForm()"
+                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Filter and Sort Controls Section -->
+            <div class="mb-6 slide-up">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <!-- Category Filter -->
+                        <div class="flex items-center flex-wrap gap-4">
+                            <div class="flex items-center">
+                                <i class="bx bx-filter mr-2"></i>
+                                <span class="text-sm font-medium">Filter:</span>
+                            </div>
+                            <select id="monthFilter" class="border rounded-lg px-3 py-1">
+                                <option value="">All Months</option>
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                            <select id="categoryFilter" class="border rounded-lg px-3 py-1">
+                                <option value="">All Categories</option>
+                                <option value="groceries">Groceries</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="rent">Rent</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="education">Education</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <!-- Sort Controls -->
+                        <div class="flex items-center">
+                            <select id="sortOption" class="border rounded-lg px-3 py-1">
+                                <option value="date-desc">Date (Newest)</option>
+                                <option value="date-asc">Date (Oldest)</option>
+                                <option value="amount-desc">Amount (Highest)</option>
+                                <option value="amount-asc">Amount (Lowest)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Table Section -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-500 slide-up">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-xl font-semibold text-gray-800">Expense Records</h3>
+                    <button onclick="fetchExpenses()"
+                            class="text-red-500 hover:text-red-600 transition-colors text-sm flex items-center"
+                            title="Refresh data">
+                        <i class="bx bx-refresh mr-1"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTable">
+                            <!-- Expense records populated via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Financial Tips and Coming Soon Section -->
+            <!-- ...existing Financial Tips and Coming Soon markup... -->
+        </div>
+    </div>
+
+    <!-- <script src="/js/expense.js"></script> -->
+    <script>
+        // Add this function at the start
+        function checkAuthResponse(response) {
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                throw new Error('Session expired. Please login again.');
+            }
+            return response;
+        }
+
+        let expenseList = [];
+
+        // Fetch expenses when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchExpenses();
+            // Set default date to today for the form
+            document.getElementById('expenseDate').valueAsDate = new Date();
+        });
+
+        // Update fetchExpenses
+        async function fetchExpenses() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/v1/expense/get', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(checkAuthResponse);
+                
+                expenseList = await response.json();
+                updateUI();
+            } catch (error) {
+                console.error('Error:', error);
+                if (!error.message.includes('Session expired')) {
+                    alert('Failed to load expenses');
+                }
+            }
+        }
+
+        function updateUI() {
+            const filteredAndSortedExpenses = filterAndSortExpenses();
+            updateStatsCards();
+            updateExpenseTable(filteredAndSortedExpenses);
+        }
+
+        function filterAndSortExpenses() {
+            let filteredExpenses = [...expenseList];
+            
+            // Month filter
+            const monthFilter = document.getElementById('monthFilter').value;
+            if (monthFilter !== '') {
+                filteredExpenses = filteredExpenses.filter(expense => {
+                    const expenseDate = new Date(expense.date);
+                    return expenseDate.getMonth() === parseInt(monthFilter);
+                });
+            }
+
+            // Category filter
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            if (categoryFilter !== '') {
+                filteredExpenses = filteredExpenses.filter(expense => 
+                    expense.category === categoryFilter
+                );
+            }
+
+            // Sort
+            const sortOption = document.getElementById('sortOption').value;
+            filteredExpenses.sort((a, b) => {
+                switch (sortOption) {
+                    case 'date-desc':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'date-asc':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'amount-desc':
+                        return b.amount - a.amount;
+                    case 'amount-asc':
+                        return a.amount - b.amount;
+                    default:
+                        return new Date(b.date) - new Date(a.date);
+                }
+            });
+
+            return filteredExpenses; // Return filtered expenses instead of modifying original array
+        }
+
+        function updateStatsCards() {
+            // Calculate total expenses
+            const total = expenseList.reduce((sum, exp) => sum + exp.amount, 0);
+            document.getElementById('totalExpenses').textContent = total.toFixed(2);
+
+            // Calculate average expense
+            const avg = expenseList.length ? total / expenseList.length : 0;
+            document.getElementById('averageExpense').textContent = avg.toFixed(2);
+
+            // Find top category
+            const categoryTotals = {};
+            expenseList.forEach(exp => {
+                categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+            });
+            const topCategory = Object.entries(categoryTotals)
+                .sort(([,a], [,b]) => b - a)[0];
+            document.getElementById('topCategory').textContent = topCategory ? topCategory[0] : '-';
+
+            // Recent activity
+            const recentCount = expenseList.length;
+            document.getElementById('recentActivity').textContent = 
+                recentCount ? `${recentCount} transactions` : 'No activity';
+        }
+
+        function updateExpenseTable(expenses = expenseList) {
+            const tbody = document.getElementById('expenseTable');
+            tbody.innerHTML = '';
+
+            expenses.forEach(expense => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${expense.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">$${expense.amount.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(expense.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editExpense('${expense._id}')" class="text-blue-500 hover:text-blue-700 mr-2">
+                            <i class="bx bx-edit"></i>
+                        </button>
+                        <button onclick="deleteExpense('${expense._id}')" class="text-red-500 hover:text-red-700">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Form handling functions
+        function toggleExpenseForm() {
+            const expenseForm = document.getElementById('expenseForm');
+            const formToggleText = document.getElementById('formToggleText');
+            const formTitle = document.getElementById('formTitle');
+            const submitButtonText = document.getElementById('submitButtonText');
+            
+            if (expenseForm.classList.contains('hidden')) {
+                expenseForm.classList.remove('hidden');
+                formToggleText.textContent = 'Close Form';
+                formTitle.textContent = 'Add New Expense';
+                submitButtonText.textContent = 'Save Expense';
+                // Set default category
+                document.getElementById('category').value = 'groceries';
+            } else {
+                expenseForm.classList.add('hidden');
+                formToggleText.textContent = 'Add Expense';
+                document.getElementById('expenseSubmitForm').reset();
+            }
+        }
+
+        function cancelExpenseForm() {
+            document.getElementById('expenseSubmitForm').reset();
+            document.getElementById('expenseForm').classList.add('hidden');
+            document.getElementById('formToggleText').textContent = 'Add Expense';
+        }
+
+        async function editExpense(id) {
+            const expense = expenseList.find(e => e._id === id);
+            if (!expense) return;
+
+            document.getElementById('editId').value = id;
+            document.getElementById('category').value = expense.category;
+            document.getElementById('amount').value = expense.amount;
+            document.getElementById('expenseDate').value = new Date(expense.date).toISOString().split('T')[0];
+            
+            document.getElementById('formTitle').textContent = 'Edit Expense';
+            document.getElementById('submitButtonText').textContent = 'Update Expense';
+            document.getElementById('formToggleText').textContent = 'Close Form';
+            document.getElementById('expenseForm').classList.remove('hidden');
+        }
+
+        // Update form submission handler
+        document.getElementById('expenseSubmitForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('category').value;
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('expenseDate').value;
+            const editId = document.getElementById('editId').value;
+            
+            if (!category || !amount || !date) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            console.log('Submitting expense:', { category, amount, date }); // Debug log
+
+            try {
+                const token = localStorage.getItem('token');
+                const url = editId 
+                    ? `/api/v1/expense/${editId}`
+                    : '/api/v1/expense/add';
+                
+                const method = editId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        category: category.toLowerCase(),
+                        amount: parseFloat(amount),
+                        date: new Date(date)
+                    })
+                }).then(checkAuthResponse);
+
+                document.getElementById('expenseSubmitForm').reset();
+                document.getElementById('editId').value = '';
+                toggleExpenseForm();
+                await fetchExpenses();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Failed to save expense');
+            }
+        });
+
+        // Update delete handler
+        async function deleteExpense(id) {
+            if (!confirm('Are you sure you want to delete this expense?')) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/v1/expense/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(checkAuthResponse);
+
+                await fetchExpenses(); // Refresh the expenses list
+                alert('Expense deleted successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete expense');
+            }
+        }
+
+        function handlePrint() {
+            window.print();
+        }
+
+        // Add event listeners for filters and sort
+        document.getElementById('monthFilter').addEventListener('change', updateUI);
+        document.getElementById('categoryFilter').addEventListener('change', updateUI);
+        document.getElementById('sortOption').addEventListener('change', updateUI);
+    </script>
+</body>
+</html>

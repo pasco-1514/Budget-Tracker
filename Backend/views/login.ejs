@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Budget Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0;
+            padding: 0;
+        }
+        .shape-animation { animation: float 6s ease-in-out infinite; }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        .slide-up { animation: slideUp 0.6s ease-out forwards; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .page-container {
+                flex-direction: column !important;
+            }
+            .content-side {
+                width: 100% !important;
+                order: 1;
+            }
+            .decorator-side {
+                width: 100% !important;
+                height: auto !important;
+                min-height: 500px;
+                order: 2;
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-section {
+                margin-bottom: 1.5rem !important;
+            }
+            .form-container {
+                padding: 1rem !important;
+            }
+            .testimonial-footer {
+                padding: 0.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen page-container">
+        <!-- Content Side -->
+        <div class="w-[55%] px-4 md:px-12 pt-4 md:pt-8 pb-6 md:pb-12 flex flex-col justify-between relative fade-in content-side">
+            <!-- Top decorative shapes -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-100 to-transparent rounded-full -mr-32 -mt-32 opacity-70"></div>
+            <div class="absolute top-1/4 left-0 w-32 h-32 bg-gradient-to-br from-fuchsia-100 to-transparent rounded-full -ml-16 opacity-60"></div>
+
+            <!-- Logo & Content -->
+            <div class="z-10">
+                <div class="flex items-center mb-8 slide-up logo-section">
+                    <div class="bg-gradient-to-r from-violet-600 to-fuchsia-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
+                        <i class="bx bx-wallet text-white text-xl"></i>
+                    </div>
+                    <h2 class="ml-3 text-xl font-bold text-gray-800 tracking-wide">Budget Buddy</h2>
+                </div>
+
+                <!-- Form Container - Add responsive padding -->
+                <div class="bg-white rounded-2xl p-4 md:p-8 shadow-xl shadow-violet-200/20 border border-gray-100 slide-up form-container">
+                    <div class="lg:w-[70%] h-3/4 md:h-full flex flex-col justify-center">
+                        <h3 class="text-xl font-semibold text-black">Welcome Back</h3>
+                        <p class="text-xs text-slate-700 mt-[5px] mb-6">
+                            Please enter your credentials to log in.
+                        </p>
+
+                        <form id="loginForm" class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    name="email"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    placeholder="student@example.com"
+                                    required
+                                />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Password</label>
+                                <input 
+                                    type="password" 
+                                    name="password"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    placeholder="Min 8 Characters"
+                                    required
+                                />
+                            </div>
+
+                            <p id="errorText" class="text-red-500 text-xs"></p>
+
+                            <button type="submit" 
+                                    class="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-lg transition-colors">
+                                LOGIN
+                            </button>
+
+                            <p class="text-[13px] text-slate-800">
+                                Don't have an account? 
+                                <a href="/signup" class="font-medium text-violet-600 underline">SignUp</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial Footer - Add responsive margin -->
+            <div class="mt-4 md:mt-6 z-10 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-xl p-3 md:p-4 border border-violet-100/50 testimonial-footer">
+                <div class="flex items-center justify-between">
+                    <div class="flex">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">JD</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">MK</div>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 to-red-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">SL</div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-gray-700 text-sm">Joined by <span class="font-bold">10,000+</span> users</p>
+                            <div class="flex items-center">
+                                <div class="flex items-center text-yellow-500">★★★★★</div>
+                                <span class="ml-1 text-xs text-gray-600">4.9/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decorator Side - Updated responsive classes -->
+        <div class="w-[45%] h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-8 relative fade-in decorator-side">
+            <!-- Content moved to top -->
+            <div class="relative z-20 h-full flex flex-col">
+                <div class="mb-auto">
+                    <h2 class="text-white text-3xl md:text-4xl font-bold mb-4 slide-up">
+                        Take control<br/>of your finances
+                    </h2>
+                    <p class="text-violet-100 mb-8 max-w-md slide-up">
+                        Join thousands of users who use Budget Buddy to track expenses,
+                        manage income, and achieve financial goals.
+                    </p>
+
+                    <!-- Feature Cards -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="flex gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 slide-up hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl">
+                                <i class="bx bx-trending-up"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-white">Track Income & Expenses</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 slide-up hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-xl flex items-center justify-center text-white text-xl">
+                                <i class="bx bx-pie-chart"></i>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-white">Visualize Your Spending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decorative shapes moved after content -->
+                <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute top-[70%] left-10 shape-animation"></div>
+                <div class="w-48 h-56 rounded-[40px] border-[10px] border-white/20 backdrop-blur-sm absolute top-[30%] -right-10 shape-animation" style="animation-delay: 2s"></div>
+                <div class="w-48 h-48 rounded-[40px] bg-white/10 backdrop-blur-md absolute -bottom-7 -left-5 shape-animation"></div>
+
+                <!-- Preview Image & Stats moved to bottom -->
+                <div class="mt-auto relative">
+                    <img src="/images/image.png" 
+                         class="w-64 lg:w-[80%] mx-auto shadow-2xl shadow-purple-900/30 rounded-lg object-cover slide-up"
+                         alt="Financial Dashboard Preview">
+
+                    <!-- Floating Stats -->
+                    <div class="absolute top-10 -right-4 bg-white/90 backdrop-blur-md p-3 rounded-lg shadow-lg slide-up">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center bg-green-100 rounded-full text-green-600">
+                                <i class="bx bx-bar-chart"></i>
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-xs text-gray-500">SAVINGS</p>
+                                <p class="text-sm font-bold text-gray-800">+27.4%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute -bottom-4 left-10 bg-white/90 backdrop-blur-md p-3 rounded-lg shadow-lg slide-up">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600">
+                                <i class="bx bx-flag"></i>
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-xs text-gray-500">GOALS</p>
+                                <p class="text-sm font-bold text-gray-800">2/3 Achieved</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

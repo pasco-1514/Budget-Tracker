@@ -1,0 +1,129 @@
+<header class="sticky top-0 z-50 w-full transition-all duration-300 bg-violet-600 text-white py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
+        <!-- Logo -->
+        <a href="/dashboard" class="flex items-center">
+            <i class="bx bx-wallet text-2xl text-white"></i>
+            <h1 class="ml-2 text-xl font-bold">Budget Buddy</h1>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex space-x-1">
+            <a href="/dashboard" 
+               class="px-3 py-2 rounded-lg flex items-center transition-all <%= currentPage === 'dashboard' ? 'bg-violet-500 text-white font-medium' : 'text-white hover:bg-violet-500' %>">
+                <i class="bx bx-home mr-1"></i>
+                <span>Home</span>
+            </a>
+            <a href="/income" 
+               class="px-3 py-2 rounded-lg flex items-center transition-all <%= currentPage === 'income' ? 'bg-violet-500 text-white font-medium' : 'text-white hover:bg-violet-500' %>">
+                <i class="bx bx-money mr-1"></i>
+                <span>Income</span>
+            </a>
+            <a href="/expenses" 
+               class="px-3 py-2 rounded-lg flex items-center transition-all <%= currentPage === 'expenses' ? 'bg-violet-500 text-white font-medium' : 'text-white hover:bg-violet-500' %>">
+                <i class="bx bx-receipt mr-1"></i>
+                <span>Expenses</span>
+            </a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="md:hidden text-white">
+            <i class="bx bx-menu text-2xl"></i>
+        </button>
+
+        <!-- Logout Button (Desktop) -->
+        <button id="logoutBtn" 
+                class="hidden md:flex items-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium ml-3">
+            <i class="bx bx-log-out mr-2"></i>
+            Logout
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white shadow-lg rounded-b-lg mt-2 overflow-hidden">
+        <div class="px-4 py-2 space-y-1">
+            <a href="/dashboard" 
+               class="block px-3 py-2 rounded-lg transition-colors <%= currentPage === 'dashboard' ? 'bg-violet-100 text-violet-700 font-medium' : 'text-gray-600 hover:bg-gray-100' %>">
+                <div class="flex items-center">
+                    <i class="bx bx-home mr-3"></i>
+                    <span>Home</span>
+                </div>
+            </a>
+            <a href="/income" 
+               class="block px-3 py-2 rounded-lg transition-colors <%= currentPage === 'income' ? 'bg-violet-100 text-violet-700 font-medium' : 'text-gray-600 hover:bg-gray-100' %>">
+                <div class="flex items-center">
+                    <i class="bx bx-money mr-3"></i>
+                    <span>Income</span>
+                </div>
+            </a>
+            <a href="/expenses" 
+               class="block px-3 py-2 rounded-lg transition-colors <%= currentPage === 'expenses' ? 'bg-violet-100 text-violet-700 font-medium' : 'text-gray-600 hover:bg-gray-100' %>">
+                <div class="flex items-center">
+                    <i class="bx bx-receipt mr-3"></i>
+                    <span>Expenses</span>
+                </div>
+            </a>
+
+            <button onclick="handleLogout()" 
+                    class="w-full mt-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
+                <i class="bx bx-log-out mr-2"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Mobile menu toggle
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+        const icon = document.querySelector('#mobileMenuBtn i');
+        icon.classList.toggle('bx-menu');
+        icon.classList.toggle('bx-x');
+        document.body.style.overflow = menu.classList.contains('hidden') ? 'auto' : 'hidden';
+    });
+
+    // Scroll effect - modified to preserve logout button visibility
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 10) {
+            header.classList.remove('bg-violet-600', 'py-4');
+            header.classList.add('bg-white', 'shadow-md', 'py-2');
+            // Change text color except for logout button
+            header.querySelectorAll('a, i:not(#logoutBtn i)').forEach(el => {
+                el.classList.remove('text-white');
+                el.classList.add('text-gray-800');
+            });
+        } else {
+            header.classList.add('bg-violet-600', 'py-4');
+            header.classList.remove('bg-white', 'shadow-md', 'py-2');
+            // Revert text color except for logout button
+            header.querySelectorAll('a, i:not(#logoutBtn i)').forEach(el => {
+                el.classList.add('text-white');
+                el.classList.remove('text-gray-800');
+            });
+        }
+    });
+
+    // Logout functionality
+    function handleLogout() {
+        // Remove token from localStorage
+        localStorage.removeItem('token');
+        
+        // If you're using session cookies, you might want to clear them too
+        document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        
+        // Redirect to login page
+        window.location.href = '/login';
+    }
+
+    // Add click event to desktop logout button
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+    // Helper function to check active route
+    function isActive(path) {
+        const currentPath = window.location.pathname;
+        if (path === '/dashboard') return currentPath === '/dashboard';
+        return currentPath.includes(path) && path !== '/dashboard';
+    }
+</script>

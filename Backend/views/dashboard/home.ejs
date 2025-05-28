@@ -1,0 +1,271 @@
+<!-- views/dashboard/home.ejs -->
+<%- include('../partials/header', {scrolled: false, mobileMenuOpen: false}) %>
+
+<div class="min-h-screen bg-gray-50 pb-10">
+  <div class="px-6 max-w-7xl mx-auto">
+    <!-- Welcome Banner -->
+    <div class="mt-6 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold mb-2">Welcome to Budget Buddy</h1>
+          <p class="text-violet-100">Your personal finance dashboard</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+              <%= new Date().toLocaleDateString('en-US', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) %>
+            </span>
+            <button onclick="fetchDashboardData()" class="bg-white text-violet-700 hover:bg-violet-100 px-3 py-1 rounded-full text-sm transition-colors">
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+      <!-- Income Card -->
+      <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-500 transform hover:shadow-lg">
+        <div class="p-5">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                  <i class="fas fa-arrow-up text-green-600"></i>
+                </div>
+                <p class="text-gray-500 text-sm font-medium">Total Income</p>
+              </div>
+              <h3 class="text-3xl font-bold text-gray-800 mt-3">
+                $<%= dashboardData.totalIncome || 0 %>
+              </h3>
+            </div>
+            <div class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+              +12% ↑
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <a href="/income" class="text-green-600 hover:text-green-700 text-sm font-medium transition-colors">
+              View Income Details →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Card -->
+      <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-500 transform hover:shadow-lg">
+        <div class="p-5">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center">
+                <div class="bg-red-100 p-2 rounded-lg mr-3">
+                  <i class="fas fa-arrow-down text-red-600"></i>
+                </div>
+                <p class="text-gray-500 text-sm font-medium">Total Expenses</p>
+              </div>
+              <h3 class="text-3xl font-bold text-gray-800 mt-3">
+                $<%= dashboardData.totalExpense || 0 %>
+              </h3>
+            </div>
+            <div class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              +8% ↑
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <a href="/expenses" class="text-red-600 hover:text-red-700 text-sm font-medium transition-colors">
+              View Expense Details →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Card -->
+      <div class="bg-white rounded-xl overflow-hidden shadow-md transition-all duration-500 transform hover:shadow-lg">
+        <div class="p-5">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center">
+                <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                  <i class="fas fa-wallet text-blue-600"></i>
+                </div>
+                <p class="text-gray-500 text-sm font-medium">Total Balance</p>
+              </div>
+              <h3 class="text-3xl font-bold text-gray-800 mt-3">
+                $<%= dashboardData.totalBalance || 0 %>
+              </h3>
+            </div>
+            <div class="<%= balanceTrend.isUp ? 'bg-green-500' : 'bg-red-500' %> text-white text-xs px-2 py-1 rounded-full">
+              <%= balanceTrend.isUp ? '+' : '-' %><%= balanceTrend.percentage %>% <%= balanceTrend.isUp ? '↑' : '↓' %>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <div class="flex items-center">
+              <div class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded mr-2">
+                <i class="fas fa-chart-line inline mr-1" style="font-size: 10px;"></i>
+                Positive trend
+              </div>
+              <div class="text-gray-500 text-xs">
+                <i class="far fa-calendar-alt inline mr-1" style="font-size: 10px;"></i>
+                Last 30 days
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Chart -->
+    <%- include('../partials/analytics-chart', {data: dashboardData.chartData}) %>
+
+    <!-- Transactions Table -->
+    <div class="mt-8">
+      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between md:items-center">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">
+            Recent Transactions
+          </h3>
+
+          <!-- Transaction Filter -->
+          <% if (dashboardData.recentTransactions && dashboardData.recentTransactions.length > 0) { %>
+            <div class="flex items-center space-x-2">
+              <div class="text-gray-500 mr-2 flex items-center">
+                <i class="fas fa-filter mr-1"></i>
+                <span class="text-sm">Filter:</span>
+              </div>
+              <button onclick="setTransactionFilter('all')" class="px-3 py-1 rounded-full text-xs <%= transactionFilter === 'all' ? 'bg-violet-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
+                All
+              </button>
+              <button onclick="setTransactionFilter('income')" class="px-3 py-1 rounded-full text-xs <%= transactionFilter === 'income' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
+                Income
+              </button>
+              <button onclick="setTransactionFilter('expense')" class="px-3 py-1 rounded-full text-xs <%= transactionFilter === 'expense' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
+                Expenses
+              </button>
+            </div>
+          <% } %>
+        </div>
+
+        <% if (dashboardData.recentTransactions && filteredTransactions.length > 0) { %>
+          <div class="overflow-x-auto">
+            <table class="w-full table-auto">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category / Source</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <% filteredTransactions.forEach(txn => { %>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= txn.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                        <i class="fas <%= txn.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down' %> mr-1"></i>
+                        <%= txn.type %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 font-medium text-gray-800 capitalize">
+                      <%= txn.category || txn.source %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="<%= txn.type === 'income' ? 'text-green-600 font-medium' : 'text-red-600 font-medium' %>">
+                        $<%= txn.amount %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">
+                      <%= new Date(txn.date).toLocaleDateString() %>
+                    </td>
+                    <td class="px-6 py-4">
+                      <% if (txn.type === 'expense') { %>
+                        <div class="flex space-x-2">
+                          <button onclick="handleEditExpense('<%= txn._id %>')" class="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-blue-50 rounded" title="Edit">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button onclick="handleDeleteExpense('<%= txn._id %>')" class="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-50 rounded" title="Delete">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="p-6 text-center">
+            <% if (dashboardData.recentTransactions && dashboardData.recentTransactions.length > 0) { %>
+              <div class="text-gray-500">
+                <i class="fas fa-folder-open text-4xl mx-auto text-gray-300 mb-4"></i>
+                <p>
+                  No <%= transactionFilter !== 'all' ? transactionFilter : '' %> transactions found.
+                </p>
+                <% if (transactionFilter !== 'all') { %>
+                  <button onclick="setTransactionFilter('all')" class="mt-2 text-violet-500 hover:text-violet-600 text-sm font-medium">
+                    Show all transactions
+                  </button>
+                <% } %>
+              </div>
+            <% } else { %>
+              <div class="text-gray-500">
+                <i class="fas fa-wallet text-4xl mx-auto text-gray-300 mb-4"></i>
+                <p>No recent transactions.</p>
+                <p class="mt-2 text-sm">
+                  Add income or expenses to see your transactions here.
+                </p>
+                <div class="mt-4 flex justify-center space-x-4">
+                  <button onclick="showExpenseForm()" class="text-violet-500 hover:text-violet-600 text-sm font-medium">
+                    Add Expense
+                  </button>
+                  <a href="/income" class="text-green-500 hover:text-green-600 text-sm font-medium">
+                    Add Income
+                  </a>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+  // Client-side functionality would go here
+  function fetchDashboardData() {
+    // Fetch updated data from the server
+    fetch('/api/dashboard')
+      .then(response => response.json())
+      .then(data => {
+        // Update the UI with new data
+        // This would be more sophisticated in a real app
+        window.location.reload();
+      });
+  }
+
+  function setTransactionFilter(filter) {
+    // This would update the transaction filter
+    window.location.href = `/dashboard?filter=${filter}`;
+  }
+
+  function handleEditExpense(id) {
+    // Handle edit expense
+    window.location.href = `/expenses/edit/${id}`;
+  }
+
+  function handleDeleteExpense(id) {
+    if (confirm('Are you sure you want to delete this expense?')) {
+      fetch(`/api/expenses/${id}`, { method: 'DELETE' })
+        .then(() => window.location.reload());
+    }
+  }
+
+  function showExpenseForm() {
+    // Show the expense form
+    document.getElementById('expense-form').classList.remove('hidden');
+  }
+</script>
